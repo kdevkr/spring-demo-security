@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.social.security.SpringSocialConfigurer;
 
 import com.kdev.app.security.handler.AuthenticationCheckHandler;
 import com.kdev.app.security.handler.AuthenticationFailureHandlerImpl;
@@ -80,6 +81,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/users/{userId}/**").access("@authenticationCheckHandler.checkUserId(authentication,#userId)")
 			.antMatchers("/admin/authorities").access("hasRole('ADMIN_MASTER') or hasRole('ADMIN') and hasRole('AUTHORITY')")
 			.antMatchers("/admin/**").hasAnyRole("ADMIN_MASTER", "ADMIN")
+			.antMatchers("/connect/**").hasRole("ANONYMOUS")
 			.antMatchers("/register/**").hasRole("ANONYMOUS")
 			.antMatchers("/api/**").hasRole("API")
 			.antMatchers(HttpMethod.GET, "/blog/{userId}/admin").access("@authenticationCheckHandler.checkUserId(authentication,#userId) and hasRole('BLOG')")
@@ -144,6 +146,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		 */
 		
 		http.headers().frameOptions().sameOrigin().httpStrictTransportSecurity().disable();
+		
+		http.apply(new SpringSocialConfigurer());
 	} 
 
 	@Autowired

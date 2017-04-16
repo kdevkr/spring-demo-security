@@ -55,8 +55,13 @@
 		  <a class="btn btn-default" href="/register">회원가입</a>
 		</form>
 	</div>
+	<p></p>
 	<div class="container">
-		
+		<form action="/signin/facebook" method="post">
+		<sec:csrfInput />
+			<button type="submit" class="btn btn-default">Facebook with Account</button>
+			<a class="btn btn-default" href="/connect/facebook">Facebook Connect</a>
+		</form>
 	</div>
 </div>
 

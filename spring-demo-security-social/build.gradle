@@ -28,6 +28,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-social-facebook')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	compile group: 'org.springframework.social', name: 'spring-social-google', version: '1.0.0.RELEASE'
+	compile group: 'org.springframework.social', name: 'spring-social-security', version: '1.1.4.RELEASE'
 	compile group: 'org.springframework.security', name: 'spring-security-taglibs', version: '4.2.2.RELEASE'
 	compile group: 'javax.servlet', name: 'jstl', version: '1.2'
 	compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '8.5.12'

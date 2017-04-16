@@ -16,9 +16,8 @@ public class SpringSecuritySignInAdapter implements SignInAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(SpringSecuritySignInAdapter.class);
 	
     public String signIn(String localUserId, Connection<?> connection, NativeWebRequest request) {
-
 		UserProfile userProfile = connection.fetchUserProfile();
 		logger.info("{}",userProfile);
-        return null;
+        return localUserId;
     }
 }

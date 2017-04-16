@@ -19,7 +19,7 @@
         <div class="info">
           <h2>페이스북 계정으로 이용하기</h2>
           <ul>
-            <li>Community Webservice Platform</li>
+            <li>Spring Social with Spring Security</li>
           </ul>
         </div>
       </div>
@@ -35,13 +35,13 @@
             <li>
               <dl>
                 <dt>제공받는 자</dt>
-                <dd>Community Webservice Platform</dd>
+                <dd>Spring Social with Spring Security</dd>
               </dl>
             </li>
             <li>
               <dl>
                 <dt>제공받는 목적</dt>
-                <dd>커뮤니티 웹 서비스 플랫폼의 서비스 이용을 위한 개인 프로필 정보 수집</dd>
+                <dd>서비스 이용을 위한 개인 프로필 정보 수집</dd>
               </dl>
             </li>
             <li>

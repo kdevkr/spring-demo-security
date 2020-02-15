@@ -1,0 +1,11 @@
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          servlet:
+            mvc: INFO
+
+spring:
+  http:
+    log-request-details: true

@@ -6,7 +6,7 @@ plugins {
 
 group = 'kr.kdev'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = JavaVersion.current()
 
 configurations {
     compileOnly {
@@ -22,7 +22,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-freemarker'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.session:spring-session-core'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+//    implementation 'org.springframework.session:spring-session-core'
+    implementation 'com.h2database:h2:1.4.200'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.60.2'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'

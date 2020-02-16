@@ -1,0 +1,27 @@
+spring:
+  freemarker:
+    suffix: .html
+
+  resources:
+    static-locations: 'classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/, classpath:/META-INF/resources/webjars'
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id:
+            client-secert:
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            authorization-grant-type: authorization_code
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-info-authentication-method: POST
+
+logging:
+  level:
+    kr:
+      kdev:
+        demo: DEBUG

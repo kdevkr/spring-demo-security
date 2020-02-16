@@ -210,6 +210,9 @@ SecurityContextHolder라는 특별한 클래스는 SecurityContext를 제공하�
 ### [Web with Session](web-security-session)
 Web 예제를 기반으로 하여 Spring Session 모듈과 Redis를 연계하여 인증된 사용자 정보를 분산된 서버에 저장하여 애플리케이션에 동시 세션 제어를 부여합니다.
 
+### [Web with OAuth](web-security-oauth)
+Web 예제를 기반으로 하여 Spring Security OAuth Client 모듈을 활용하여 카카오 프로바이더에 대한 로그인을 적용합니다.
+
 ## 더 깊은 스프링 시큐리티 속으로
 우리가 알아본 것 이외에도 스프링 시큐리티가 제공하는 기능들이 더 존재합니다. 예를 들어, 웹 소켓이나 메소드 기반 또는 도메인 기반 접근 제어가 가능합니다.
 

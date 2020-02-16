@@ -94,8 +94,24 @@ SecurityDataConfiguration는 스프링 시큐리티와 스프링 데이터 모�
 _**SecurityFilterAutoConfiguration**_
 SecurityAutoConfiguration이 자동으로 등록된 이후에 SecurityFilterAutoConfiguration가 등록되어 앞서 등록된 springSecurityFilterChain이라는 이름의 빈을 DelegatingFilterProxy에 등록합니다.
 
+이외에도 Saml2RelyingPartyAutoConfiguration, OAuth2ResourceServerAutoConfiguration, OAuth2ClientAutoConfiguration가 조건하에 등록됩니다.
+
+여기까지가 스프링 부트가 스프링 시큐리티에 대한 기본 구성을 적용하는 것들입니다.
+
+## 스프링 시큐리티 구성하기
+스프링 시큐리티의 인증 매커니즘에 대해 알아보고 앞서 알아본 인증과 권한을 어떻게 적용하는지 알아보겠습니다.
+
+### 인증 매커니즘
+스프링 시큐리티는 사용자 클라이언트로부터 인증 정보를 모으는 것을 인증 매커니즘이라 합니다.
+
+사용자가 브라우저를 통해 자신을 입증할 수 있는 이름이나 비밀번호등을 제공하면 스프링 시큐리티는 인증 매커니즘을 통해 Authentication 요청 오브젝트를 만들고 AuthenticationManager에 제공합니다.
+
+이후 인증 매커니즘은 완전히 채워진 Authentication 오브젝트를 다시 받아 (요청이 유효한 것으로 간주함) Authentication를 SecurityContextHolder에 넣어 원래 요청을 다시 시도합니다.
+
+만약, AuthenticationManager에 의해 요청이 거부된 경우 인증 매커니즘은 브라우저로 다시 요청하라는 응답을 합니다.
+
 ### 구현체
-앞서 스프링 시큐리티의 인증과 권한을 이해했다면 이 두가지를 적용하기 위해서 스프링 시큐리티에 포함된 여러가지 구현체들을 알아보겠습니다.
+인증 매커니즘에 대한 동작을 처리할 때 사용되는 여러가지 인터페이스 및 구현체를 제공합니다.
 
 #### AuthenticationManager, AuthenticationProvier
 AuthenticationManager의 기본 구현체인 ProviderManager는 인증 요청을 자체적으로 처리하지 않고 설정된 AuthenticationProvier들에게 이를 위임합니다. 그리고 AuthenticationProvier는 차례대로 인증을 수행할 수 있는지 체크합니다.
@@ -168,15 +184,6 @@ UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
 
 이외에도 여러가지 기능을 위한 구현체가 존재하지만 넘어가도록 하겠습니다.
 
-### 인증 매커니즘
-스프링 시큐리티는 사용자 클라이언트에서 인증 정보를 모으는 것을 인증 매커니즘이라 합니다.
-
-사용자가 브라우저를 통해 자신을 입증할 수 있는 이름이나 비밀번호등을 제공하면 스프링 시큐리티는 인증 매커니즘을 통해 Authentication 요청 오브젝트를 만들고 AuthenticationManager에 제공합니다.
-
-이후 인증 매커니즘은 완전히 채워진 Authentication 오브젝트를 다시 받아 (요청이 유효한 것으로 간주함) Authentication를 SecurityContextHolder에 넣어 원래 요청을 다시 시도합니다.
-
-> 만약, AuthenticationManager에 의해 요청이 거부된 경우 인증 매커니즘은 브라우저로 다시 요청하라는 응답을 합니다.
-
 #### SecurityContextPersistenceFilter
 일반적인 웹 애플리케이션의 경우 요청 사용자 정보를 세션으로 관리합니다. 스프링 시큐리티는 SecurityContextPersistenceFilter를 통해 HTTP 요청 간에서 HttpSession에 포함된 속성들을 SecurityContext에 저장합니다. 
 
@@ -202,6 +209,17 @@ SecurityContextHolder라는 특별한 클래스는 SecurityContext를 제공하�
 
 ### [Web with Session](web-security-session)
 Web 예제를 기반으로 하여 Spring Session 모듈과 Redis를 연계하여 인증된 사용자 정보를 분산된 서버에 저장하여 애플리케이션에 동시 세션 제어를 부여합니다.
+
+## 더 깊은 스프링 시큐리티 속으로
+우리가 알아본 것 이외에도 스프링 시큐리티가 제공하는 기능들이 더 존재합니다. 예를 들어, 웹 소켓이나 메소드 기반 또는 도메인 기반 접근 제어가 가능합니다.
+
+다음 스프링 시큐리티에 대해서 적용할 때 좋은 글과 동영상을 공유합니다.
+
+- [샤쿠님의 스프링 시큐리티 커스텀 로그인](http://syaku.tistory.com/278)  
+- [제타건담님의 스프링 시큐리티](http://zgundam.tistory.com/43)  
+- [아라한사님의 스프링 시큐리티 따라해보기](https://www.youtube.com/watch?v=C0BQplG7Epo&list=PLvudjKUrAA6bLu1CvgSPEKLhlIEIAJXjm)  
+- [백기선님의 스프링 시큐리티](https://www.youtube.com/watch?v=AiDjJzMXWmM)  
+- [하마님의 스프링 시큐리티](http://hamait.tistory.com/325)  
 
 ## 참고
 - [Spring Security Reference - 5.2.2.RELEASE](https://docs.spring.io/spring-security/site/docs/5.2.2.RELEASE/reference/html5/)

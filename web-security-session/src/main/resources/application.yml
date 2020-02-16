@@ -1,0 +1,20 @@
+spring:
+  freemarker:
+    suffix: .html
+
+  resources:
+    static-locations: 'classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/, classpath:/META-INF/resources/webjars'
+  session:
+    store-type: redis
+
+
+logging:
+  level:
+    kr:
+      kdev:
+        demo: DEBUG
+server:
+  servlet:
+    session:
+      timeout: 60m
+      persistent: true

@@ -265,7 +265,7 @@ response_type에 따라서 code인 경우 Authorization Code 인증을 진행하
 > 카카오톡 로그인 시 개인정보 동의 항목을 선택하는 화면과 같습니다.
 > 다만, 프로필 항목을 필수로 선택되어지게 제한을 한 것 이죠
 
-![](src/main/resources/static/images/oauth-approval-scopes.png)
+![](src/main/resources/static/images/oauth-approval-scopes.PNG)
 
 사용자가 어떤 권한을 제공할지 선택했으면 인증 서버는 redirect_uri로 인증 코드 또는 토큰을 발급하여 응답합니다.
 
@@ -281,7 +281,7 @@ response_type에 따라서 code인 경우 Authorization Code 인증을 진행하
 - scope : 사용자가 동의한 항목 중에서 자격 증명에 포함될 항목
 - code : 인증 코드
 
-![](src/main/resources/static/images/token-endpoint-request-post.png)
+![](src/main/resources/static/images/token-endpoint-request-post.PNG)
 
 성공적으로 인증되었으면 위와 같이 자격 증명(액세스 토큰)이 발급되었을 것입니다.
 
@@ -364,7 +364,7 @@ public void configure(ResourceServerSecurityConfigurer resources) {
 
 다시 OAuth 인증 프로세스를 거쳐 액세스 토큰을 요청하면 다음과 같이 JWT로 발급합니다.
 
-![](src/main/resources/static/images/token-endpoint-jwt.png)
+![](src/main/resources/static/images/token-endpoint-jwt.PNG)
 
 ## 참고
 - [OAuth 2 Developers Guide](https://projects.spring.io/spring-security-oauth/docs/oauth2.html)

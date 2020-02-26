@@ -24,10 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -218,38 +216,6 @@ public class SecurityConfig {
                 .authenticationManager(authenticationManager)
                 .accessTokenConverter(accessTokenConverter())
                 .tokenStore(tokenStore());
-        }
-    }
-
-    /**
-     * 자원 서버 구성
-     */
-    @Configuration(proxyBeanMethods = false)
-    public static class ResourceServerConfig extends ResourceServerConfigurerAdapter {
-
-        private final TokenStore tokenStore;
-        private final DefaultTokenServices tokenServices;
-        private final AuthenticationManager authenticationManager;
-
-        public ResourceServerConfig(TokenStore tokenStore,
-                                    DefaultTokenServices tokenServices,
-                                    AuthenticationManager authenticationManager) {
-            this.tokenStore = tokenStore;
-            this.tokenServices = tokenServices;
-            this.authenticationManager = authenticationManager;
-        }
-
-        @Override
-        public void configure(ResourceServerSecurityConfigurer resources) {
-            resources
-                    .authenticationManager(authenticationManager)
-                    .tokenStore(tokenStore)
-                    .tokenServices(tokenServices);
-        }
-
-        @Override
-        public void configure(HttpSecurity http) throws Exception {
-            // Prevent HttpSecurity overriding.
         }
     }
 

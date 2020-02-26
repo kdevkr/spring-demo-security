@@ -1,14 +1,15 @@
 package kr.kdev.demo.config;
 
+import kr.kdev.demo.service.ClientService;
 import kr.kdev.demo.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -17,16 +18,24 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
-
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 /**
  * Security Configuration Integration
@@ -38,19 +47,9 @@ public class SecurityConfig {
 
     public static final int PRINCIPAL_LOCK_BASELINE = 5;
 
-    /**
-     * Spring Boot 2.0는 기본적으로 BCryptPasswordEncoder를 사용합니다.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        String idForEncode = "bcrypt";
-
-        Map<String, PasswordEncoder> encoders = new HashMap<>();
-        encoders.put(idForEncode, new BCryptPasswordEncoder(12));
-        encoders.put("pbkdf2", new Pbkdf2PasswordEncoder());
-        encoders.put("scrypt", new SCryptPasswordEncoder());
-
-        return new DelegatingPasswordEncoder(idForEncode, encoders);
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
@@ -62,60 +61,52 @@ public class SecurityConfig {
         return authenticationProvider;
     }
 
-    /**
-     * 웹 보안 설정
-     * WebSecurityConfigurerAdapter를 확장하여 보안 설정을 커스터마이징할 수 있습니다.
-     */
     @EnableWebSecurity
     @Configuration(proxyBeanMethods = false)
     public static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         private final String[] staticLocations;
         private final Environment environment;
-        private final DataSource dataSource;
         private final PasswordEncoder passwordEncoder;
         private final UserService userService;
-        private final DaoAuthenticationProvider daoAuthenticationProvider;
+        private final SessionRegistry sessionRegistry;
+
 
         public WebSecurityConfig(Environment environment,
-                                 DataSource dataSource,
                                  PasswordEncoder passwordEncoder,
                                  ResourceProperties resourceProperties,
                                  UserService userService,
-                                 DaoAuthenticationProvider daoAuthenticationProvider) {
+                                 SessionRegistry sessionRegistry) {
             this.environment = environment;
-            this.dataSource = dataSource;
             this.passwordEncoder = passwordEncoder;
             this.staticLocations = resourceProperties.getStaticLocations();
             this.userService = userService;
-            this.daoAuthenticationProvider = daoAuthenticationProvider;
+            this.sessionRegistry = sessionRegistry;
         }
 
-        /**
-         * ProviderManager 커스터마이징
-         */
+        @Bean
+        public HttpFirewall httpFirewall() {
+            return new DefaultHttpFirewall();
+        }
+
+        @Bean
+        @Override
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            return super.authenticationManagerBean();
+        }
+
+        @Autowired
+        public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+            auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
+        }
+
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            User.UserBuilder userBuilder = User.builder();
-            String password = "{bcrypt}$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG";
-
-            // InMemoryUserDetailsManager는 자체적으로 사용자 정보를 메모리에 보유하고 이를 활용하여 인증합니다.
-            auth.inMemoryAuthentication().passwordEncoder(passwordEncoder).withUser(userBuilder.username("system").password(password).roles("SYSTEM"));
-
-
-            // JdbcDaoImpl를 UserDetailsService로 지정하여 스프링 시큐리티가 제공하는 기본 DB 스키마를 사용합니다.
-            auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder).withDefaultSchema().withUser(userBuilder.username("admin").password(password).roles("ADMIN"));
-
-
-            // JdbcDaoImpl 대신에 애플리케이션 사용자 스키마를 적용하기 위하여 개별적으로 구현된 UserDetailsService를 사용합니다.
-            // 이는 DaoAuthenticationProvider를 authenticationProvider로 지정하는 것과 동일합니다.
-            auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
-            auth.authenticationProvider(daoAuthenticationProvider);
+            auth
+                .userDetailsService(userService)
+                .passwordEncoder(passwordEncoder);
         }
 
-        /**
-         * 웹 보안 커스터마이징
-         */
         @Override
         public void configure(WebSecurity web) {
             web.ignoring().antMatchers(staticLocations)
@@ -123,11 +114,12 @@ public class SecurityConfig {
                 .debug(environment.acceptsProfiles(Profiles.of("debug")));
         }
 
+
         /**
          * HTTP 보안 커스터마이징
          */
         @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        public void configure(HttpSecurity http) throws Exception {
             http.formLogin()
                     .and()
                 .httpBasic();
@@ -137,21 +129,128 @@ public class SecurityConfig {
             http.authorizeRequests()
                     .antMatchers("/api/login", "/api/logout").permitAll()
                     .antMatchers("/console/**").hasAnyRole("SYSTEM")
-                    .antMatchers("/api/**").authenticated()
+                    .antMatchers("/", "/api/**").authenticated()
+                    .antMatchers("/oauth/authorize").authenticated()
                     .anyRequest().permitAll();
+
+            http.sessionManagement().maximumSessions(5).sessionRegistry(sessionRegistry);
+
+            http.headers(headers ->
+                    headers.referrerPolicy(referrerPolicy ->
+                            referrerPolicy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN)));
         }
     }
 
-    /**
-     * 메소드 기반 보안 설정
-     *
-     *  prePostEnabled : {@link PreAuthorize}와 {@link PostAuthorize}를 사용하여 함수에 대한 접근을 제어합니다.
-     *  securedEnabled : {@link Secured} 어노테이션을 사용하여 함수에 대한 접근을 제어합니다.
-     *  jsr250Enabled : JSR-250 기반의 어노테이션을 사용하여 함수에 대한 접근을 제어합니다.
-     */
     @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = false)
     @Configuration(proxyBeanMethods = false)
     public static class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
     }
+
+
+    /**
+     * 인증 서버 구성
+     */
+    @EnableAuthorizationServer
+    @Configuration
+    public static class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+
+        private final PasswordEncoder passwordEncoder;
+        private final ClientService clientService;
+        private final AuthenticationManager authenticationManager;
+
+        public AuthorizationServerConfig(PasswordEncoder passwordEncoder,
+                                         ClientService clientService,
+                                         AuthenticationManager authenticationManager) {
+            this.passwordEncoder = passwordEncoder;
+            this.clientService = clientService;
+            this.authenticationManager = authenticationManager;
+        }
+
+        /**
+         * JWTs can be signed using a secret (with the HMAC algorithm) or a public/private key pair using RSA or ECDSA.
+         */
+        @Bean
+        public JwtAccessTokenConverter accessTokenConverter() {
+            JwtAccessTokenConverter accessTokenConverter = new JwtAccessTokenConverter();
+            accessTokenConverter.setSigningKey("password");
+//            accessTokenConverter.setKeyPair();
+            return accessTokenConverter;
+        }
+
+        @Bean
+        public TokenStore tokenStore() {
+            return new JwtTokenStore(accessTokenConverter());
+        }
+
+        @Bean
+        @Primary
+        public DefaultTokenServices tokenServices() {
+            DefaultTokenServices tokenServices = new DefaultTokenServices();
+            tokenServices.setTokenStore(tokenStore());
+            tokenServices.setClientDetailsService(clientService);
+            tokenServices.setSupportRefreshToken(true);
+            return tokenServices;
+        }
+
+        @Override
+        public void configure(AuthorizationServerSecurityConfigurer security) {
+            security
+                .allowFormAuthenticationForClients()
+                .authenticationEntryPoint(new OAuth2AuthenticationEntryPoint())
+                .passwordEncoder(passwordEncoder);
+        }
+
+        /**
+         * 클라이언트 정보 발급
+         */
+        @Override
+        public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+            clients.withClientDetails(clientService);
+        }
+
+        /**
+         * 인증 서버 설정
+         */
+        @Override
+        public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
+            endpoints
+                .authenticationManager(authenticationManager)
+                .accessTokenConverter(accessTokenConverter())
+                .tokenStore(tokenStore());
+        }
+    }
+
+    /**
+     * 자원 서버 구성
+     */
+    @Configuration(proxyBeanMethods = false)
+    public static class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+
+        private final TokenStore tokenStore;
+        private final DefaultTokenServices tokenServices;
+        private final AuthenticationManager authenticationManager;
+
+        public ResourceServerConfig(TokenStore tokenStore,
+                                    DefaultTokenServices tokenServices,
+                                    AuthenticationManager authenticationManager) {
+            this.tokenStore = tokenStore;
+            this.tokenServices = tokenServices;
+            this.authenticationManager = authenticationManager;
+        }
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) {
+            resources
+                    .authenticationManager(authenticationManager)
+                    .tokenStore(tokenStore)
+                    .tokenServices(tokenServices);
+        }
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            // Prevent HttpSecurity overriding.
+        }
+    }
+
 }

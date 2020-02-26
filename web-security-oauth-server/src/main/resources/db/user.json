@@ -1,0 +1,23 @@
+[
+  {
+    "userId": 1,
+    "name": "system",
+    "id": "system",
+    "password": "$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG",
+    "role": "SYSTEM"
+  },
+  {
+    "userId": 2,
+    "name": "admin",
+    "id": "admin",
+    "password": "$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG",
+    "role": "ADMIN"
+  },
+  {
+    "userId": 3,
+    "name": "user",
+    "id": "user",
+    "password": "$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG",
+    "role": "USER"
+  }
+]

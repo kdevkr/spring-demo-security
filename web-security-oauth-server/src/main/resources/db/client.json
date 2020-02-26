@@ -1,0 +1,19 @@
+[
+  {
+    "name": "client_1",
+    "clientId": "e0113ca5-486f-43e9-9615-674b2232caed",
+    "clientSecret": "$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG",
+    "authorizedGrantTypes": "authorization_code, client_credentials, refresh_token",
+    "registeredRedirectUri": "http://localhost:8080",
+    "accessTokenValidity": 86400,
+    "refreshTokenValidity": 604800
+  },
+  {
+    "name": "client_2",
+    "clientId": "429c4db4-821c-414e-bccd-2f4826ea08c4",
+    "clientSecret": "$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG",
+    "authorizedGrantTypes": "authorization_code, implicit, client_credentials",
+    "registeredRedirectUri": "http://localhost:8080",
+    "accessTokenValidity": 86400
+  }
+]

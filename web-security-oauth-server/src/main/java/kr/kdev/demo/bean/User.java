@@ -14,7 +14,7 @@ import static kr.kdev.demo.config.SecurityConfig.PRINCIPAL_LOCK_BASELINE;
 @Data
 public class User implements UserDetails {
 
-    private String uuid;
+    private String userId;
     private String id;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;

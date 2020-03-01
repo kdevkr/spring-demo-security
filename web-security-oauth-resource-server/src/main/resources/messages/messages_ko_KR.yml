@@ -1,0 +1,44 @@
+AbstractAccessDecisionManager:
+  accessDenied: 접근이 거부되었습니다.
+
+AbstractSecurityInterceptor:
+  authenticationNotFound: SecurityContext에서 Authentication 객체를 찾을 수 없습니다.
+
+AbstractUserDetailsAuthenticationProvider:
+  badCredentials: 자격 증명에 실패하였습니다.
+  credentialsExpired: 자격 증명 유효 기간이 만료되었습니다.
+  disabled: 유효하지 않은 사용자입니다.
+  expired: 사용자 계정의 유효 기간이 만료 되었습니다.
+  locked: 사용자 계정이 잠겨 있습니다.
+  onlySupports: UsernamePasswordAuthenticationToken만 지원합니다.
+
+AccountStatusUserDetailsChecker:
+  credentialsExpired: 자격 증명 유효 기간이 만료되었습니다.
+  disabled: 유효하지 않은 사용자입니다.
+  expired: 사용자 계정의 유효 기간이 만료 되었습니다.
+  locked: 사용자 계정이 잠겨 있습니다.
+
+AnonymousAuthenticationProvider:
+  incorrectKey: 제공된 AnonymousAuthenticationToken에는 필요로하는 key가 없습니다.
+
+BindAuthenticator:
+  badCredentials: 자격 증명에 실패하였습니다.
+  emptyPassword: 비밀번호 항목이 비어 있습니다.
+
+ConcurrentSessionControlAuthenticationStrategy:
+  exceededAllowed: 최대 세션 허용 수 {0}개를 초과하였습니다.
+
+PasswordComparisonAuthenticator:
+  badCredentials: 자격 증명에 실패하였습니다.
+
+PersistentTokenBasedRememberMeServices:
+  cookieStolen: 로그인 상태 유지를 위한 토큰이 일치하지 않습니다. 이전에 사용한 토큰이 타인으로부터 탈취 당했을 수 있습니다.
+
+ProviderManager:
+  providerNotFound: {0}을 위한 AuthenticationProvider를 찾을 수 없습니다.
+
+RememberMeAuthenticationProvider:
+  incorrectKey: 제공된 RememberMeAuthenticationToken에는 필요로 하는 key가 없습니다.
+
+SubjectDnX509PrincipalExtractor:
+  noMatching: 'subjectDN\: {0} 내에 매칭되는 패턴이 없습니다.'

@@ -289,15 +289,6 @@ response_type에 따라서 code인 경우 Authorization Code 인증을 진행하
 
 이제 OAuth 2 리소스 서버로 자격 증명을 이용하여 요청하면 됩니다.
 
-#### 여기서 잠깐!
-예제에서는 OAuth 인증 서버와 리소스 서버를 같이 구성하였습니다. 하지만 일반적인 경우 카카오처럼 인증 서버와 리소스(API) 서버를 독립적으로 구성합니다.
-
-카카오의 OAuth Host는 다음과 같습니다.
-- https://kauth.kakao.com : Authorization ResourceServerSecurityConfigurer
-- https://kapi.kakao.com : Resource Server
-
-
-
 ### JWT(JSON Web Token)  
 스프링 시큐리티는 OAuth로 발급하는 토큰을 JWT로 변경하는 것이 유연합니다.
 

@@ -24,8 +24,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -216,6 +219,25 @@ public class SecurityConfig {
                 .authenticationManager(authenticationManager)
                 .accessTokenConverter(accessTokenConverter())
                 .tokenStore(tokenStore());
+        }
+    }
+
+    @Configuration
+    @EnableResourceServer
+    public static class ResourceServerConfig implements ResourceServerConfigurer {
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+            resources.authenticationEntryPoint(new OAuth2AuthenticationEntryPoint());
+        }
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.requestMatchers()
+                    .antMatchers("/api/v1/**")
+                .and()
+                    .authorizeRequests()
+                    .anyRequest().authenticated();
         }
     }
 

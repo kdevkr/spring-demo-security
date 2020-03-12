@@ -23,6 +23,8 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -139,6 +141,15 @@ public class SecurityConfig {
                     .antMatchers("/console/**").hasAnyRole("SYSTEM")
                     .antMatchers("/api/**").authenticated()
                     .anyRequest().permitAll();
+
+            http.formLogin().successHandler(authenticationSuccessHandler());
+        }
+
+        @Bean
+        public AuthenticationSuccessHandler authenticationSuccessHandler() {
+            SavedRequestAwareAuthenticationSuccessHandler authenticationSuccessHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+            authenticationSuccessHandler.setTargetUrlParameter("redirect-uri");
+            return authenticationSuccessHandler;
         }
     }
 

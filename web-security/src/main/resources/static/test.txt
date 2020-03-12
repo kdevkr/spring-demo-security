@@ -1,0 +1,1 @@
+You can download test.txt because web security ignore static locations.

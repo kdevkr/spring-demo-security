@@ -17,27 +17,10 @@ import java.nio.charset.StandardCharsets;
 @Controller
 public class IndexController {
 
-    private String README;
-
-    public IndexController() {
-
-    }
+    public IndexController() {}
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("README", this.README);
         return "index";
-    }
-
-    @PostConstruct
-    private void load() throws IOException {
-        String realPath = getClass().getResource("/").getPath().replaceAll("/out/production/classes", "") + "README.md";
-
-        FileSystemResource fileSystemResource = new FileSystemResource(realPath);
-        String copyToString = StreamUtils.copyToString(fileSystemResource.getInputStream(), StandardCharsets.UTF_8);
-        Parser parser = Parser.builder().build();
-        Node document = parser.parse(copyToString);
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
-        this.README = renderer.render(document);
     }
 }

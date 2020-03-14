@@ -8,13 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 import static kr.kdev.demo.config.SecurityConfig.PRINCIPAL_LOCK_BASELINE;
 
 @Data
 public class User implements UserDetails {
 
-    private String uuid;
+    private String userId = UUID.randomUUID().toString();
     private String id;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;

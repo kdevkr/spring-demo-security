@@ -4,11 +4,15 @@ import kr.kdev.demo.service.UserService;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -20,13 +24,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.sql.DataSource;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +49,8 @@ public class SecurityConfig {
 
     /**
      * Spring Boot 2.0는 기본적으로 BCryptPasswordEncoder를 사용합니다.
+     *
+     * 다음은 {@link DelegatingPasswordEncoder}를 사용하여 PasswordEncoder 체인을 구성합니다.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -49,8 +58,9 @@ public class SecurityConfig {
 
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put(idForEncode, new BCryptPasswordEncoder(12));
-        encoders.put("pbkdf2", new Pbkdf2PasswordEncoder());
-        encoders.put("scrypt", new SCryptPasswordEncoder());
+//        encoders.put("pbkdf2", new Pbkdf2PasswordEncoder());
+//        encoders.put("scrypt", new SCryptPasswordEncoder());
+        encoders.put("noop", NoOpPasswordEncoder.getInstance());
 
         return new DelegatingPasswordEncoder(idForEncode, encoders);
     }
@@ -64,10 +74,6 @@ public class SecurityConfig {
         return authenticationProvider;
     }
 
-    /**
-     * 웹 보안 설정
-     * WebSecurityConfigurerAdapter를 확장하여 보안 설정을 커스터마이징할 수 있습니다.
-     */
     @EnableWebSecurity
     @Configuration(proxyBeanMethods = false)
     public static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -94,55 +100,66 @@ public class SecurityConfig {
         }
 
         /**
-         * ProviderManager 커스터마이징
+         * {@link AuthenticationManagerBuilder}를 통해 {@link AuthenticationProvider}를 추가하십시오.
+         * AuthenticationManagerBuilder는 {@link ProviderManager}를 구성합니다.
          */
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             User.UserBuilder userBuilder = User.builder();
-            String password = "{bcrypt}$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG";
+//            String password = "{bcrypt}$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG";
+            String password = "{noop}password";
 
-            // InMemoryUserDetailsManager는 자체적으로 사용자 정보를 메모리에 보유하고 이를 활용하여 인증합니다.
-            auth.inMemoryAuthentication().passwordEncoder(passwordEncoder).withUser(userBuilder.username("system").password(password).roles("SYSTEM"));
+            auth
+                // DaoAuthenticationProvider는 UserDetailsService에서 제공하는 사용자 정보를 통해 인증할 수 있도록 제공합니다.
+                .authenticationProvider(daoAuthenticationProvider)
+                .userDetailsService(userService).passwordEncoder(passwordEncoder)
+            .and()
 
-
-            // JdbcDaoImpl를 UserDetailsService로 지정하여 스프링 시큐리티가 제공하는 기본 DB 스키마를 사용합니다.
-            auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder).withDefaultSchema().withUser(userBuilder.username("admin").password(password).roles("ADMIN"));
-
-
-            // JdbcDaoImpl 대신에 애플리케이션 사용자 스키마를 적용하기 위하여 개별적으로 구현된 UserDetailsService를 사용합니다.
-            // 이는 DaoAuthenticationProvider를 authenticationProvider로 지정하는 것과 동일합니다.
-            auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
-            auth.authenticationProvider(daoAuthenticationProvider);
+                // JdbcUserDetailsManager는 기본 JDBC 스키마를 사용해서 사용자 정보를 구성하고 인증할 수 있도록 제공합니다.
+                .jdbcAuthentication()
+                .dataSource(dataSource).passwordEncoder(passwordEncoder).withDefaultSchema()
+                    .withUser(userBuilder.username("admin").password(password).roles("ADMIN"))
+            .and()
+                // InMemoryUserDetailsManager는 사용자 정보를 메모리에 저장하여 인증할 수 있도록 제공합니다.
+                .inMemoryAuthentication()
+                    .passwordEncoder(passwordEncoder)
+                    .withUser(userBuilder.username("system").password(password).roles("SYSTEM"));
         }
 
         /**
-         * 웹 보안 커스터마이징
+         * 웹에 대한 보안 설정
          */
         @Override
         public void configure(WebSecurity web) {
-            web.ignoring().antMatchers(staticLocations)
-                    .and()
-                .debug(environment.acceptsProfiles(Profiles.of("debug")));
+            web.ignoring().antMatchers(staticLocations);
+
+//            StrictHttpFirewall httpFirewall = new StrictHttpFirewall();
+//            httpFirewall.setAllowedHostnames((hostname)-> hostname.equals("github.com"));
+//            httpFirewall.setAllowedHostnames((hostname)-> hostname.equals("localhost"));
+//            web.httpFirewall(httpFirewall);
+
+            // 웹 보안에 대한 디버그 메시지를 활성화 할 수 있습니다.
+            web.debug(environment.acceptsProfiles(Profiles.of("debug")));
         }
 
         /**
-         * HTTP 보안 커스터마이징
+         * HTTP에 대한 보안 설정
          */
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.formLogin()
-                    .and()
-                .httpBasic();
-
+            http.formLogin();
+            http.httpBasic().disable();
             http.csrf().disable();
 
+//            http.cors(cors -> cors.configurationSource(configurationSource()));
+
+            // Permit login and logout api.
+            // but, other apis only can access authenticated user.
             http.authorizeRequests()
                     .antMatchers("/api/login", "/api/logout").permitAll()
-                    .antMatchers("/console/**").hasAnyRole("SYSTEM")
                     .antMatchers("/api/**").authenticated()
-                    .anyRequest().permitAll();
-
-            http.formLogin().successHandler(authenticationSuccessHandler());
+                    .antMatchers("/console/**", "/api/console/**").hasRole("SYSTEM")
+                    .antMatchers("/").permitAll();
         }
 
         @Bean
@@ -151,16 +168,34 @@ public class SecurityConfig {
             authenticationSuccessHandler.setTargetUrlParameter("redirect-uri");
             return authenticationSuccessHandler;
         }
+
+        /**
+         * Cors 구성 예시
+         * @return Cors 설정 정보
+         */
+        private CorsConfigurationSource configurationSource() {
+            CorsConfiguration corsConfiguration = new CorsConfiguration();
+            corsConfiguration.setMaxAge(Duration.ofDays(1));
+            corsConfiguration.setAllowCredentials(true);
+            corsConfiguration.addAllowedOrigin("*");
+            corsConfiguration.addAllowedHeader("*");
+            corsConfiguration.addAllowedMethod(HttpMethod.GET);
+
+            UrlBasedCorsConfigurationSource configurationSource = new UrlBasedCorsConfigurationSource();
+            configurationSource.setRemoveSemicolonContent(true);
+            configurationSource.registerCorsConfiguration("/**", corsConfiguration);
+            return configurationSource;
+        }
     }
 
     /**
-     * 메소드 기반 보안 설정
+     * 메소드 보안 설정
      *
      *  prePostEnabled : {@link PreAuthorize}와 {@link PostAuthorize}를 사용하여 함수에 대한 접근을 제어합니다.
      *  securedEnabled : {@link Secured} 어노테이션을 사용하여 함수에 대한 접근을 제어합니다.
      *  jsr250Enabled : JSR-250 기반의 어노테이션을 사용하여 함수에 대한 접근을 제어합니다.
      */
-    @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = false)
+    @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = false, jsr250Enabled = false)
     @Configuration(proxyBeanMethods = false)
     public static class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 

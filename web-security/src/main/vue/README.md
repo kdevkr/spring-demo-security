@@ -10,7 +10,7 @@ npm i -D babel-loader babel-polyfill @babel/core @babel/polyfill @babel/preset-e
 
 # npm install for vuejs.
 npm i -D vue vue-loader vue-router vuex vue-style-loader vue-template-compiler
-npm i -D bootstrap-vue axios
+npm i -D bootstrap bootstrap-vue axios
 
 # npm install for postcss.
 npm i -D postcss-loader postcss-cssnext precss cssnano

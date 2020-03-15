@@ -147,7 +147,7 @@ public class SecurityConfig {
          */
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.formLogin();
+            http.formLogin().loginPage("/login");
             http.httpBasic().disable();
             http.csrf().disable();
 

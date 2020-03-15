@@ -25,24 +25,13 @@ public class IndexController {
     public IndexController() {}
 
     @GetMapping("/")
-    public String index(HttpServletRequest request, @CurrentUser UserDetails currentUser, Model model) {
-        String sessionId = RequestContextHolder.getRequestAttributes().getSessionId();
+    public String index(HttpServletRequest request, Model model) {
+        model.addAttribute("entryJS", "/dist/index.js");
+        return "index";
+    }
 
-        UserState userState = new UserState();
-
-        if(currentUser != null) {
-            if(currentUser instanceof User) {
-                userState.setUserId(((User) currentUser).getUserId());
-                userState.setName(currentUser.getUsername());
-            } else {
-                userState.setUserId(UUID.randomUUID().toString());
-                userState.setName(currentUser.getUsername());
-            }
-        }
-
-        userState.setSessionId(sessionId);
-
-        model.addAttribute("state", userState);
+    @GetMapping("/login")
+    public String login(HttpServletRequest request, Model model) {
         model.addAttribute("entryJS", "/dist/index.js");
         return "index";
     }

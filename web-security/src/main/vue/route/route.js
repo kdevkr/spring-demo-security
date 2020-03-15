@@ -8,6 +8,7 @@ import VueRouter from 'vue-router'
 import Blank from '~/vue/common/blank'
 import Index from '~/vue/page/index'
 import Main from '~/vue/page/main'
+import Login from '~/vue/page/login'
 
 Vue.use(VueRouter)
 
@@ -20,17 +21,11 @@ const routes = [
         }
     },
     {
-        path: '/:service(s1)',
-        component: Blank,
+        path: '/login',
+        component: Login,
         meta: {
-            title: ''
+            title: 'login'
         },
-        children: [
-            {
-                path: '',
-                component: Main
-            }
-        ]
     }
 ]
 

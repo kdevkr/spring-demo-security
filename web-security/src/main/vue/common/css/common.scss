@@ -1,0 +1,18 @@
+@import '~bootstrap';
+@import '~bootstrap-vue';
+@import 'footer.scss';
+
+.form-group {
+  &.text-value {
+    .form-row {
+      .col {
+        padding-top: calc(.375rem + 1px);
+        padding-bottom: calc(.375rem + 1px);
+      }
+    }
+  }
+}
+
+.login-form {
+  max-width: 350px;
+}

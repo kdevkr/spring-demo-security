@@ -130,7 +130,7 @@ public class SecurityConfig {
             http.authorizeRequests()
                     .antMatchers("/api/login", "/api/logout").permitAll()
                     .antMatchers("/console/**").hasAnyRole("SYSTEM")
-                    .antMatchers("/", "/api/**").authenticated()
+                    .antMatchers("/api/**").authenticated()
                     .antMatchers("/oauth/authorize").authenticated()
                     .anyRequest().permitAll();
 

@@ -2,6 +2,7 @@ package kr.kdev.demo.api;
 
 import kr.kdev.demo.bean.KakaoOAuth2User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -25,7 +26,7 @@ public class UserApi extends BaseApi {
     }
 
     @GetMapping("/users/me")
-    public ResponseEntity<Object> currentUser(@AuthenticationPrincipal Principal principal) {
+    public ResponseEntity<Object> currentUser(Authentication authentication, @AuthenticationPrincipal Principal principal) {
         return ResponseEntity.ok(principal);
     }
 

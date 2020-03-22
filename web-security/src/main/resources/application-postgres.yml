@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      username: kdevkr
+      password: password
+      maximum-pool-size: 100
+      minimum-idle: 50
+    url: 'jdbc:postgresql://localhost:5432/demo'

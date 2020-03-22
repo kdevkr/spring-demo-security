@@ -1,6 +1,8 @@
 package kr.kdev.demo.service;
 
 import kr.kdev.demo.bean.User;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,20 +15,30 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService implements UserDetailsService {
 
+    private final JdbcTemplate jdbcTemplate;
+    public UserService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(username.equals("system") || username.equals("admin")) {
+        if("system".equals(username)) {
             throw new UsernameNotFoundException("error.notFound");
         }
 
-        // 여러분의 사용자 DB를 기반으로 UserDetails 구현체를 제공할 수 있습니다.
-        User user = new User();
-        user.setId(username);
-        user.setName(username);
-        user.setPassword("{bcrypt}$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG");
+        User user = this.getUser(username);
+        if(user == null) {
+            throw new UsernameNotFoundException("error.notFound");
+        }
 
+        return user;
+    }
 
-
+    public User getUser(String id) {
+        User user = jdbcTemplate.queryForObject("SELECT u.*, array_remove(array_agg(ua.authority), NULL) AS authorities FROM users u" +
+                " LEFT JOIN users_authority ua ON u.user_id = ua.user_id" +
+                " WHERE u.id = ?" +
+                " GROUP BY u.user_id", new Object[]{id}, new BeanPropertyRowMapper<>(User.class));
         return user;
     }
 }

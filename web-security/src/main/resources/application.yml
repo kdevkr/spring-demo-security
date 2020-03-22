@@ -4,10 +4,11 @@ spring:
 
   resources:
     static-locations: 'classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/, classpath:/dist/, classpath:/META-INF/resources/webjars'
+  datasource:
+    driver-class-name: org.h2.Driver
 
 logging:
   level:
     kr:
       kdev:
         demo: DEBUG
-

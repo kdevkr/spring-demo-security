@@ -2,9 +2,9 @@ package kr.kdev.demo.config;
 
 import kr.kdev.demo.service.UserService;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
@@ -76,22 +76,21 @@ public class SecurityConfig {
 
     @EnableWebSecurity
     @Configuration(proxyBeanMethods = false)
-    public static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    public static class WebSecurityConfig extends WebSecurityConfigurerAdapter implements EnvironmentAware {
 
         private final String[] staticLocations;
-        private final Environment environment;
         private final DataSource dataSource;
         private final PasswordEncoder passwordEncoder;
         private final UserService userService;
         private final DaoAuthenticationProvider daoAuthenticationProvider;
 
-        public WebSecurityConfig(Environment environment,
-                                 DataSource dataSource,
+        private Environment environment;
+
+        public WebSecurityConfig(DataSource dataSource,
                                  PasswordEncoder passwordEncoder,
                                  ResourceProperties resourceProperties,
                                  UserService userService,
                                  DaoAuthenticationProvider daoAuthenticationProvider) {
-            this.environment = environment;
             this.dataSource = dataSource;
             this.passwordEncoder = passwordEncoder;
             this.staticLocations = resourceProperties.getStaticLocations();
@@ -106,24 +105,25 @@ public class SecurityConfig {
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             User.UserBuilder userBuilder = User.builder();
-//            String password = "{bcrypt}$2a$12$ry/T4SyQyiNpaWbadf9sne3Cko..q92Oh2klkCMv4XB1qG6cy8iaG";
-            String password = "{noop}password";
+            String password = "password";
+            String encodedPassword = passwordEncoder.encode(password);
 
-            auth
+            // InMemoryUserDetailsManager는 사용자 정보를 메모리에 저장하여 인증할 수 있도록 제공합니다.
+            auth.inMemoryAuthentication()
+                .passwordEncoder(passwordEncoder)
+                .withUser(userBuilder.username("system").password(encodedPassword).roles("SYSTEM"));
+
+            if(environment.acceptsProfiles(Profiles.of("postgres"))) {
                 // DaoAuthenticationProvider는 UserDetailsService에서 제공하는 사용자 정보를 통해 인증할 수 있도록 제공합니다.
-                .authenticationProvider(daoAuthenticationProvider)
-                .userDetailsService(userService).passwordEncoder(passwordEncoder)
-            .and()
-
+                auth.authenticationProvider(daoAuthenticationProvider)
+                    .userDetailsService(userService).passwordEncoder(passwordEncoder);
+            } else {
                 // JdbcUserDetailsManager는 기본 JDBC 스키마를 사용해서 사용자 정보를 구성하고 인증할 수 있도록 제공합니다.
-                .jdbcAuthentication()
-                .dataSource(dataSource).passwordEncoder(passwordEncoder).withDefaultSchema()
-                    .withUser(userBuilder.username("admin").password(password).roles("ADMIN"))
-            .and()
-                // InMemoryUserDetailsManager는 사용자 정보를 메모리에 저장하여 인증할 수 있도록 제공합니다.
-                .inMemoryAuthentication()
-                    .passwordEncoder(passwordEncoder)
-                    .withUser(userBuilder.username("system").password(password).roles("SYSTEM"));
+                auth.jdbcAuthentication()
+                    .dataSource(dataSource).passwordEncoder(passwordEncoder).withDefaultSchema()
+                        .withUser(userBuilder.username("admin").password(encodedPassword).roles("ADMIN")
+                                    .authorities("REPOSITORY_CREATE"));
+            }
         }
 
         /**
@@ -147,7 +147,8 @@ public class SecurityConfig {
          */
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.formLogin().loginPage("/login");
+            http.formLogin()
+                    .loginPage("/login");
             http.httpBasic().disable();
             http.csrf().disable();
 
@@ -185,6 +186,11 @@ public class SecurityConfig {
             configurationSource.setRemoveSemicolonContent(true);
             configurationSource.registerCorsConfiguration("/**", corsConfiguration);
             return configurationSource;
+        }
+
+        @Override
+        public void setEnvironment(Environment environment) {
+            this.environment = environment;
         }
     }
 

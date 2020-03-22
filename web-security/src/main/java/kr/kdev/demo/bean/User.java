@@ -2,13 +2,15 @@ package kr.kdev.demo.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.postgresql.jdbc.PgArray;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityCoreVersion;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static kr.kdev.demo.config.SecurityConfig.PRINCIPAL_LOCK_BASELINE;
 
@@ -21,6 +23,7 @@ public class User implements UserDetails {
     private String password;
     private String name;
     private String role;
+    private List<String> authorities;
 
     private int loginFailCount;
     private Long expiredAt;
@@ -32,6 +35,11 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         ArrayList<GrantedAuthority> authorities = new ArrayList<>();
+        if(this.authorities != null) {
+            List<SimpleGrantedAuthority> grantedAuthorities = this.authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+            authorities.addAll(grantedAuthorities);
+        }
+
         if(this.role != null) {
             authorities.add((GrantedAuthority) () -> "ROLE_" + this.role);
         }
@@ -66,5 +74,12 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !deleted;
+    }
+
+    public void setAuthorities(PgArray pgArray) throws SQLException {
+        Object array = pgArray.getArray();
+        String[] values = (String[]) array;
+        List<String> strings = Arrays.asList(values);
+        this.authorities = strings;
     }
 }

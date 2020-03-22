@@ -25,16 +25,24 @@
             <b-row align-v="center">
                 <b-col align-self="center">
                     <section class="p-5">
-                        <b-form-group label-cols="5" label="principal" class="text-value" horizontal>
-                            {{authentication.username}}
-                        </b-form-group>
-                        <b-form-group label-cols="5" label="authorities" class="text-value" horizontal>
-                            <div>
-                                <b-badge class="mr-1" v-for="(authority, index) in authentication.authorities" :key="'authority_' + index">
-                                    {{authority.authority}}
-                                </b-badge>
-                            </div>
-                        </b-form-group>
+                        <b-card-group v-if="authentication.username">
+                            <b-card border-variant="dark" header="Information" align="center">
+                                <b-form-group label-cols="5" label="principal" class="text-value" horizontal>
+                                    {{authentication.username}}
+                                </b-form-group>
+                                <b-form-group label-cols="5" label="authorities" class="text-value" horizontal>
+                                    <div>
+                                        <b-badge class="mr-1" v-for="(authority, index) in authentication.authorities" :key="'authority_' + index">
+                                            {{authority.authority}}
+                                        </b-badge>
+                                    </div>
+                                </b-form-group>
+                            </b-card>
+                        </b-card-group>
+                        <div v-else>
+                            <p>You are still an anonymous user.</p>
+                            <p>Try login to verify authenticated user.</p>
+                        </div>
                     </section>
                 </b-col>
             </b-row>

@@ -1,20 +1,17 @@
 ## Web Security OAuth Server
+Spring Security OAuth 프로젝트는 더이상 업데이트되지 않으며 이제 OAuth 2.0은 스프링 시큐리티에서 제공합니다. 
 
-스프링 시큐리티는 OAuth2 로그인 기능 뿐만 아니라 OAuth2 서버를 구축할 수 있도록 지원합니다. 
+다만, 스프링 시큐리티를 통한 OAuth 2.0 구성에 대한 문서는 아직 업데이트되지 않았으므로 [OAuth 2 Developers Guide](https://projects.spring.io/spring-security-oauth/docs/oauth2.html)와 [OAuth 2.0 Migration Guide](https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide)를 참고하여 구성해야합니다.
 
-- [OAuth 2 Developers Guide](https://projects.spring.io/spring-security-oauth/docs/oauth2.html)  
-- [OAuth 2.0 Migration Guide](https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide)  
-- [카카오 REST API 개발가이드](https://developers.kakao.com/docs/restapi)
-
-> 뜬금없이 카카오 REST API 개발가이드는 왜 나오냐구요?
-> 카카오가 구축한 OAuth2 서버와 비교하여 OAuth2 서버를 구현하는 방법을 좀 더 쉽게 다가가고자 합니다.
+국내 개발자들이 OAuth 2.0 시스템에 대한 구성을 쉽게 이해할 수 있도록 [카카오 REST API 개발가이드](https://developers.kakao.com/docs/restapi)를 참고하여 OAuth 2.0 서버를 구현해보도록 하겠습니다.
 
 ### OAuth 2.0 Spectification
 스프링 시큐리티는 OAuth 2.0 표준 스펙에 따라 권한 및 리소스 서버를 구현할 수 있도록 지원합니다.
 - [RFC 6749 - The OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)  
 - [OAuth 2.0](https://oauth.net/2/)  
 
-다음은 OAuth 2.0 스펙과 카카오 OAuth2 로그인 시 활용되는 항목의 비교입니다.
+다음은 OAuth 2.0 스펙과 카카오 OAuth2 로그인 시 활용되는 항목을 비교한 표입니다.
+
 |카카오 OAuth2|OAuth 2.0 Spectification|
 |---|---|
 |앱 키|client_id|
@@ -33,7 +30,7 @@
 
 예를 들어, 카카오 OAuth2 로그인은 Authorization Code 유형으로 자격 증명(액세스 토큰 또는 리프래쉬 토큰)을 얻는 과정을 수행합니다. 
 
-스프링 시큐리티에서 `AuthorizationEndpoint`는 Authorization Code 유형으로 자격 증명을 얻기 위한 인증 코드를 발급하는 것을 담당합니다. 이 엔드포인트는 아주 간단하게 `@EnableAuthorizationServer`로 OAuth 2.0 인증 서버 매커니즘을 적용할 때 추가됩니다.
+스프링 시큐리티에서는 `AuthorizationEndpoint`가 Authorization Code 유형으로 자격 증명을 얻기 위한 인증 코드를 발급하는 것을 담당합니다. 이 엔드포인트는 아주 간단하게 `@EnableAuthorizationServer`로 OAuth 2.0 인증 서버 매커니즘을 적용하면 추가할 수 있습니다.
 
 ```java
 @EnableAuthorizationServer
@@ -57,10 +54,10 @@ public static class AuthorizationServerConfig extends AuthorizationServerConfigu
 ```
 
 #### ClientDetailsServiceConfigurer
-OAuth2 인증 과정에서 필요한 클라이언트 정보를 수립하는 설정을 진행합니다. 예를 들어, 카카오 애플리케이션에서는 앱키에 해당하는 정보를 만들어내는 과정입니다.
+OAuth2 인증 과정에서 필요한 클라이언트 정보를 수립하는 것을 담당합니다. 예를 들어, 카카오 애플리케이션에서는 앱키에 해당하는 정보를 만들어내는 과정입니다.
 
 ##### 클라이언트 정보 구성
-클라이언트 정보는 다음과 같이 구성됩니다.
+OAuth 클라이언트 정보는 다음과 같이 구성됩니다.
 
 - ClientId: (필수) 클라이언트 아이디
 - secret: (신뢰된 클라이언트인 경우) 클라이언트 시크릿
@@ -68,7 +65,7 @@ OAuth2 인증 과정에서 필요한 클라이언트 정보를 수립하는 설�
 - authorizedGrantTypes: 클라이언트가 사용할 수 있는 인증 유형
 - authorities: 클라이언트에 부여된 권한
 
-> 이 클라이언트 정보는 JDBC와 같은 저장소를 이용하거나 ClientDetailsManager 인터페이스를 통하여 실행중인 애플리케이션에서 업데이트 할 수 있습니다.
+> 이 클라이언트 정보는 ClientDetailsManager 인터페이스를 통해 생성하거나 JDBC와 같은 저장소를 활용할 수 있습니다.
 
 다음은 사용자 정의된 `ClientDetailsService`를 적용하는 예시입니다.
 ```java
@@ -110,6 +107,7 @@ public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 ```
 
 **db/client.json**
+다음의 JSON은 두 개의 클라이언트 정보를 구성하고 있습니다.
 ```json
 [
   {
@@ -237,12 +235,14 @@ public class Client implements ClientDetails {
 }
 ```
 
-자격 증명을 가져오기 위한 인증 서버 구현은 완료되었으며 이제 브라우저를 통해 카카오 로그인 연동하기 처럼 인증 프로세스를 진행해보겠습니다.
+이로써 자격 증명을 가져오기 위한 인증 서버에 대한 구현이 완료되었습니다.
+
+이제 브라우저를 통해 카카오 로그인 연동하기 처럼 인증 프로세스를 진행해보겠습니다.
 
 ### Authorization Process
 
 #### /oauth/authorize
-기본적으로 인증 엔드포인트의 URL은 `/oauth/authorize`입니다.
+기본적인 인증 엔드포인트의 URL은 `/oauth/authorize`입니다.
 
 - client_id : 발급된 클라이언트 아이디
 - response_type : `code` 또는 `token`

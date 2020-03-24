@@ -1,6 +1,5 @@
 package kr.kdev.demo.config;
 
-import kr.kdev.demo.service.UserService;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,15 +54,6 @@ public class SecurityConfig {
         return new DelegatingPasswordEncoder(idForEncode, encoders);
     }
 
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(PasswordEncoder passwordEncoder,
-                                                               UserService userService) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
-        authenticationProvider.setUserDetailsService(userService);
-        return authenticationProvider;
-    }
-
     /**
      * 웹 보안 설정
      * WebSecurityConfigurerAdapter를 확장하여 보안 설정을 커스터마이징할 수 있습니다.
@@ -76,8 +66,6 @@ public class SecurityConfig {
         private final Environment environment;
         private final DataSource dataSource;
         private final PasswordEncoder passwordEncoder;
-        private final UserService userService;
-        private final DaoAuthenticationProvider daoAuthenticationProvider;
         private final SessionRegistry sessionRegistry;
         private final RememberMeServices rememberMeServices;
 
@@ -85,16 +73,12 @@ public class SecurityConfig {
                                  DataSource dataSource,
                                  PasswordEncoder passwordEncoder,
                                  ResourceProperties resourceProperties,
-                                 UserService userService,
-                                 DaoAuthenticationProvider daoAuthenticationProvider,
                                  SessionRegistry sessionRegistry,
                                  RememberMeServices rememberMeServices) {
             this.environment = environment;
             this.dataSource = dataSource;
             this.passwordEncoder = passwordEncoder;
             this.staticLocations = resourceProperties.getStaticLocations();
-            this.userService = userService;
-            this.daoAuthenticationProvider = daoAuthenticationProvider;
             this.sessionRegistry = sessionRegistry;
             this.rememberMeServices = rememberMeServices;
         }
@@ -113,12 +97,6 @@ public class SecurityConfig {
 
             // JdbcDaoImpl를 UserDetailsService로 지정하여 스프링 시큐리티가 제공하는 기본 DB 스키마를 사용합니다.
             auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder).withDefaultSchema().withUser(userBuilder.username("admin").password(password).roles("ADMIN"));
-
-
-            // JdbcDaoImpl 대신에 애플리케이션 사용자 스키마를 적용하기 위하여 개별적으로 구현된 UserDetailsService를 사용합니다.
-            // 이는 DaoAuthenticationProvider를 authenticationProvider로 지정하는 것과 동일합니다.
-            auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
-            auth.authenticationProvider(daoAuthenticationProvider);
         }
 
         /**

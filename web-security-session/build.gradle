@@ -23,12 +23,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'io.lettuce:lettuce-core'
     implementation 'it.ozimov:embedded-redis:0.7.2'
     implementation 'com.h2database:h2:1.4.200'
-    implementation 'com.vladsch.flexmark:flexmark-all:0.60.2'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'

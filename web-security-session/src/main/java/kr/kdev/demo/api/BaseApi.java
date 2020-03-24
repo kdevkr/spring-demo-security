@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 @RestControllerAdvice

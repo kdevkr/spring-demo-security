@@ -2,7 +2,6 @@ package kr.kdev.demo.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import kr.kdev.demo.bean.Client;
 import kr.kdev.demo.bean.User;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +14,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * 인증 서비스
- * @author kdevkr
- */
 @Service
 public class UserService implements UserDetailsService {
 

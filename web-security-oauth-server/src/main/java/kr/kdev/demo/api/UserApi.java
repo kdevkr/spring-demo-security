@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -39,10 +38,6 @@ public class UserApi extends BaseApi {
                 principal = (UserDetails) authentication.getPrincipal();
             }
         }
-
-        Object details = authentication.getDetails();
-
-
         return ResponseEntity.ok(principal);
     }
 

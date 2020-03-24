@@ -115,10 +115,6 @@ public class SecurityConfig {
                 .debug(environment.acceptsProfiles(Profiles.of("debug")));
         }
 
-
-        /**
-         * HTTP 보안 커스터마이징
-         */
         @Override
         public void configure(HttpSecurity http) throws Exception {
             http.formLogin()
@@ -148,10 +144,6 @@ public class SecurityConfig {
 
     }
 
-
-    /**
-     * 인증 서버 구성
-     */
     @EnableAuthorizationServer
     @Configuration
     public static class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -202,17 +194,11 @@ public class SecurityConfig {
                 .passwordEncoder(passwordEncoder);
         }
 
-        /**
-         * 클라이언트 정보 발급
-         */
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
             clients.withClientDetails(clientService);
         }
 
-        /**
-         * 인증 서버 설정
-         */
         @Override
         public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
             endpoints

@@ -7,39 +7,42 @@
 - [OAuth2 Boot - 2.2.4.RELEASE](https://docs.spring.io/spring-security-oauth2-boot/docs/2.2.4.RELEASE/reference/html5/)
 
 ## 초보 개발자가 이해하는 스프링 시큐리티
-스프링 시큐리티에 입문하기 위해서는 조금이나마 보안에 대한 개념과 스프링 AOP를 이해하고 있어야 합니다. 지금부터 초보 개발자가 이해하는 스프링 시큐리티를 시작해보겠습니다.
+스프링 시큐리티에 입문하기 위해서는 보안에 대한 개념과 스프링 AOP를 이해하고 있어야 합니다.
 
 ### 아키텍처
-가장 먼저 스프링 시큐리티의 보안 아키텍처를 살펴보고 이해해보도록 하겠습니다. 스프링 시큐리티로 보안을 적용하는데 있어 스프링 시큐리티가 동작하는 과정을 이해하는데 기반이 됩니다.
+스프링 시큐리티 모듈을 적용하기 위해서 가장 먼저 스프링 시큐리티의 보안 아키텍처를 살펴보고 이해해여야 합니다. 보안 아키텍처를 알면 스프링 시큐리티가 동작하는 과정을 알 수 있게 됩니다.
 
-> [제타건담님의 글](https://zgundam.tistory.com/43)에서도 인증과 권한에 대해서 서술합니다.
-
-스프링 시큐리티의 아키텍처는 보안을 구성하는 두가지 영역으로 인증과 권한을 가집니다. 
+스프링 시큐리티의 보안 아키텍처는 보안을 구성하는 두가지 영역으로 인증과 권한을 가집니다. 
 
 #### 인증(Authentication)  
-
-가장 일반적인 인증 시나리오를 생각해보면 사용자는 이름과 비밀번호를 통해 로그인을 시도하면 시스템은 사용자의 이름과 패스워드가 일치하는지 확인하고 사용자의 정보를 얻습니다. 그 후 사용자의 보안 컨텍스트를 수립하여 시스템을 사용할 수 있게 허가됩니다.
-
-따라서, 스프링 시큐리티에서의 인증이란 사용자가 자신을 입증할 수 있는 정보를 시스템에 제공하고 시스템이 사용자에 대한 정보를 검증하고 로그인된 사용자를 위한 보안 전략을 설정하는 것을 말합니다.
+스프링 시큐리티에서 인증이란 사용자가 자신을 입증할 수 있는 정보를 시스템에 제공함으로써 시스템이 사용자에 대한 정보를 검증하고 로그인된 사용자를 위한 보안 전략을 수립하는 것을 말합니다.
 
 > [스프링 시큐리티에서 인증이란 무엇인가요?](https://docs.spring.io/spring-security/site/docs/current/reference/html5/#what-is-authentication-in-spring-security)
 
+예를 들어, 가장 일반적인 인증 시나리오를 생각해보겠습니다. 사용자는 이름과 비밀번호를 통해 로그인을 시도합니다. 이에 시스템은 사용자가 입력한 이름과 비밀번호가 일치하는지를 확인하고 사용자의 정보를 얻어 시스템을 사용할 수 있도록 허가하게 됩니다.
+
 #### 권한(Authorization)
 스프링 시큐리티에서 권한이란 접근 제어(Access-Control)입니다. 
+
 접근 제어란 보호된 자원에 대하여 접근을 허가하거나 거부하는 기능을 말하며 애플리케이션에서 보호된 자원은 메소드 호출이나 웹 요청이 될 수 있습니다.
 
 > 스프링 시큐리티는 AOP 및 웹 요청을 위한 필터를 통해 접근 제어를 수행합니다.
 
 ![](https://docs.spring.io/spring-security/site/docs/current/reference/html5/images/security-interception.png)
 
-위 그림은 보호된 자원에 대하여 권한을 확인하는데 사용되는 구현체를 설명합니다. 여러가지 구현체를 통해 다양한 방식으로 접근 제어가 가능하다는 것으로 이해하시기 바랍니다.
+위 그림은 스프링 시큐리티에서 보호된 자원에 대하여 권한을 확인하는데 사용되는 구현체를 설명합니다. 여러가지 구현체를 통해 다양한 방식으로 접근 제어가 가능하다는 것으로 이해하시기 바랍니다.
 
-스프링 시큐리티의 아키텍처를 종합해보면 인증과 권한을 통해 권한 승인이 필요한 부분으로 접근하기 위해서는 인증 과정을 통해 사용자(인증 주체)가 증명되어야만 한다는 것입니다.
+이렇게 스프링 시큐리티의 아키텍처를 종합해보면 인증과 권한을 통해 권한 승인이 필요한 부분으로 접근하기 위해서는 인증 과정을 통해 사용자(인증 주체)가 증명되어야만 한다는 것을 알 수 있습니다.
+
+> 스프링 시큐리티의 인증과 권한에 대해서 좀 더 찾아보시기 바랍니다.
 
 ### 스프링 시큐리티 시작하기
-스프링 시큐리티는 spring-security-web과 spring-security-config 모듈로 이루어져있습니다. spring-boot-starter-security는 이 두가지 모듈에 대한 의존성을 포함하고 있습니다.
+스프링 시큐리티는 `spring-security-web`과 `spring-security-config` 모듈로 이루어져있습니다. 
 
-**build.gradle**
+> `spring-boot-starter-security`는 두 모듈에 대한 의존성을 포함합니다.
+
+**build.gradle**  
+
 ```java
 plugins {
     id 'org.springframework.boot' version '2.2.4.RELEASE'
@@ -54,7 +57,7 @@ dependencies {
 ```
 
 #### 시큐리티 자동 구성
-스프링 부트는 spring-boot-starter-security에 따라 스프링 시큐리티를 자동으로 구성합니다. 이 자동 구성을 통해 어떻게 스프링 시큐리티를 구성하는지 알아보도록 하겠습니다.
+스프링 부트는 spring-boot-starter-security에 따라 스프링 시큐리티를 자동으로 구성하게 됩니다.
 
 시큐리티 자동 구성 클래스는 SecurityAutoConfiguration입니다.
 
@@ -204,25 +207,21 @@ SecurityContextHolder라는 특별한 클래스는 SecurityContext를 제공하�
 ## 스프링 시큐리티 예제
 초보 개발자가 이해하는 스프링 시큐리티 예제는 스프링 부트를 기반으로 작성하였습니다. 스프링 부트는 스프링을 사용할 때 필요한 여러가지 기본 설정들을 자동으로 제공해주어 빠른 예제 작성을 위해 사용하였습니다.
 
-### [Web](web-security)
-기초적인 설정부터 인증 프로세스, 접근 제어를 다룹니다.
+### Web
 
-### [Web with Session](web-security-session)
-Web 예제를 기반으로 하여 Spring Session 모듈과 Redis를 연계하여 인증된 사용자 정보를 분산된 서버에 저장하여 애플리케이션에 동시 세션 제어를 부여합니다.
+#### [Web](web-security)
+스프링 시큐리티 설정부터 인증 프로세스, 접근 제어를 다루는 기초 예제
 
-### [Web with OAuth](web-security-oauth)
-Web 예제를 기반으로 하여 Spring Security OAuth Client 모듈을 활용하여 카카오 프로바이더에 대한 로그인을 적용합니다.
+#### [Web Session](web-security-session)
+`spring-session` 모듈과 연계하여 인증된 사용자 정보를 Redis와 같은 분산 저장소에 저장하고 세션에 대한 동시성 제어를 적용할 수 있음을 확인하는 예제
 
-## 더 깊은 스프링 시큐리티 속으로
-우리가 알아본 것 이외에도 스프링 시큐리티가 제공하는 기능들이 더 존재합니다. 예를 들어, 웹 소켓이나 메소드 기반 또는 도메인 기반 접근 제어가 가능합니다.
+### Web with OAuth
 
-다음 스프링 시큐리티에 대해서 적용할 때 좋은 글과 동영상을 공유합니다.
+#### [OAuth Kakao Login](web-security-oauth-kakao-login)
+`spring-security-oauth-client` 모듈을 활용하여 카카오 프로바이더에 대한 로그인을 적용할 수 있음을 확인하는 예제
 
-- [샤쿠님의 스프링 시큐리티 커스텀 로그인](http://syaku.tistory.com/278)  
-- [제타건담님의 스프링 시큐리티](http://zgundam.tistory.com/43)  
-- [아라한사님의 스프링 시큐리티 따라해보기](https://www.youtube.com/watch?v=C0BQplG7Epo&list=PLvudjKUrAA6bLu1CvgSPEKLhlIEIAJXjm)  
-- [백기선님의 스프링 시큐리티](https://www.youtube.com/watch?v=AiDjJzMXWmM)  
-- [하마님의 스프링 시큐리티](http://hamait.tistory.com/325)  
+#### [OAuth Server](web-security-oauth-server)
+스프링 시큐리티를 통해 OAuth 2.0 시스템을 구성할 수 있음을 확인하는 예제 
 
 ## 참고
 - [Spring Security Reference - 5.2.2.RELEASE](https://docs.spring.io/spring-security/site/docs/5.2.2.RELEASE/reference/html5/)
